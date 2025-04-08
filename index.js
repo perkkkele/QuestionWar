@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const lti = require('ims-lti');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -9,16 +10,25 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const consumers = {
-  'moodle_consumer_key': 'moodle_shared_secret'
+  [process.env.LTI_KEY]: process.env.LTI_SECRET
 };
 
 const scoreStore = {};
 
 app.post('/lti/launch', (req, res) => {
-  const provider = new lti.Provider(req.body.oauth_consumer_key, consumers[req.body.oauth_consumer_key]);
+  const key = req.body.oauth_consumer_key;
+  console.log('📥 LTI LAUNCH REQUEST');
+  console.log('Clave recibida:', key);
+  console.log('Cuerpo de la petición:', req.body);
+
+  const provider = new lti.Provider(key, consumers[key]);
 
   provider.valid_request(req, (err, isValid) => {
-    if (err || !isValid) {
+    if (err) {
+      console.error('❌ Error en validación LTI:', err);
+    }
+    if (!isValid) {
+      console.error('⚠️ Petición no válida LTI');
       return res.status(401).send('LTI launch invalid');
     }
 
@@ -32,7 +42,8 @@ app.post('/lti/launch', (req, res) => {
 
     scoreStore[userId] = { provider };
 
-    res.redirect(`https://tuapp-react.netlify.app/?userId=${userId}`);
+    console.log('✅ LTI validado correctamente. Usuario:', userId);
+    res.redirect(`${process.env.FRONTEND_URL}?userId=${userId}`);
   });
 });
 
@@ -53,6 +64,7 @@ app.post('/lti/grade', (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log('Servidor LTI escuchando en http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor LTI escuchando en http://localhost:${PORT}`);
 });
