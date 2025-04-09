@@ -21,6 +21,9 @@ app.post('/lti/launch', (req, res) => {
   console.log('Clave recibida:', key);
   console.log('Cuerpo de la petición:', req.body);
   console.log('🔐 Consumers registrados:', consumers);
+  console.log('🔐 Clave esperada:', Object.keys(consumers)[0]);
+  console.log('🔐 Secreto correspondiente:', consumers[key]);
+
 
 
   const provider = new lti.Provider(key, consumers[key]);
