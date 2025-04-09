@@ -20,6 +20,8 @@ app.post('/lti/launch', (req, res) => {
   console.log('📥 LTI LAUNCH REQUEST');
   console.log('Clave recibida:', key);
   console.log('Cuerpo de la petición:', req.body);
+  console.log('🔐 Consumers registrados:', consumers);
+
 
   const provider = new lti.Provider(key, consumers[key]);
 
