@@ -1,0 +1,108 @@
+<!-- LDR Simulation for 15‑year‑old students
+     Save this file as ldr_simulation.html and host it or place it in the same folder
+     as your web page. Then embed it with:
+     <iframe src="ldr_simulation.html" width="100%" height="420" style="border:none"></iframe> -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simulación Sensor LDR</title>
+  <style>
+    :root {
+      --led-size: 90px;
+    }
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.5rem;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 1.35rem;
+      margin: 0;
+      text-align: center;
+    }
+    #panel {
+      display: grid;
+      gap: 1rem;
+      width: min(420px, 95%);
+    }
+    label {
+      font-weight: 600;
+    }
+    #led-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    #led {
+      width: var(--led-size);
+      height: var(--led-size);
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ff8080 0%, #ff0000 60%, #7a0000 100%);
+      box-shadow: 0 0 25px rgba(255, 64, 64, 0.6);
+      transition: filter 0.2s linear;
+    }
+    #luxValue, #resValue {
+      font-weight: 700;
+    }
+    footer {
+      font-size: 0.8rem;
+      opacity: 0.75;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sensor LDR: Luz vs Resistencia</h1>
+
+  <div id="panel">
+    <div>
+      <label for="luxSlider">Intensidad de luz (lux): <span id="luxValue">--</span></label><br />
+      <input id="luxSlider" type="range" min="1" max="1000" value="220" step="1" />
+    </div>
+    <div>
+      <label>Resistencia del LDR: <span id="resValue">--</span> kΩ</label>
+    </div>
+    <div id="led-wrapper">
+      <div id="led" aria-label="LED cuya intensidad representa la señal del LDR"></div>
+      <span>Nivel de salida al circuito</span>
+    </div>
+  </div>
+
+  <footer>
+    Arrastra el deslizador para ver cómo la luz cambia la resistencia y la señal del LED.
+  </footer>
+
+  <script>
+    // Modelo simple de un LDR: R = R0 * lux^(-gamma)
+    const R0 = 50;    // Resistencia en kΩ a 1 lux (valor ilustrativo)
+    const gamma = 0.7; // Exponente que modela la respuesta
+
+    const luxSlider = document.getElementById('luxSlider');
+    const luxValue  = document.getElementById('luxValue');
+    const resValue  = document.getElementById('resValue');
+    const led       = document.getElementById('led');
+
+    function actualizar() {
+      const lux = Number(luxSlider.value);
+      const resistencia = R0 * Math.pow(lux, -gamma);
+
+      // Actualiza valores en pantalla
+      luxValue.textContent = lux.toFixed(0);
+      resValue.textContent = resistencia.toFixed(1);
+
+      /* Mapeo de lux (1–1000) a brillo (0.15–1).
+         Cuanta más luz, menor resistencia y más brillo. */
+      const brillo = 0.15 + (lux / 1000) * 0.85;
+      led.style.filter = `brightness(${brillo})`;
+    }
+
+    luxSlider.addEventListener('input', actualizar);
+    actualizar(); // Estado inicial
+  </script>
+</body>
+</html>
